@@ -1,4 +1,5 @@
 import os 
+from datetime import timedelta
 from dotenv import load_dotenv 
 
 load_dotenv()
@@ -9,7 +10,8 @@ class Config():
     DEBUG = True
     SECRET_KEY = os.environ.get('SECRET_KEY', "something very tough to gauuze")
     JWT_SECRET_KEY=os.environ.get('JWT_SECRET_KEY', "ihateusingthisthing")
-    JWT_ACCESS_TOKEN_EXPIRES=os.environ.get('JWT_ACCESS_TOKEN_EXPIRES', 3600)
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=int(os.getenv("JWT_EXP_MINUTES", 15)))
+    
     JWT_REFRESH_TOKEN_EXPIRES=os.environ.get('JWT_REFRESH_TOKEN_EXPIRES', 3600)
     JWT_TOKEN_LOCATION = ["headers","cookies"]
     JWT_COOKIE_CSRF_PROTECT =True

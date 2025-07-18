@@ -1,58 +1,57 @@
-from flask import jsonify, request,redirect, url_for
+from flask import jsonify, request
 from marshmallow import ValidationError
 from flask_jwt_extended import create_access_token
 
 from ..model import User 
-from ..schema import UserSchema, UserLogin
+from ..schema import UserLogin, UserRegistration
 from . import api 
 from ..import db
-
 
 
 @api.route('/register', methods=["POST"])
 def register():
     data = request.get_json()
-    user_schema = UserSchema()
-    
+    schema = UserRegistration(session=db.session)
     try:
-        validated_data = user_schema.load(data)
-    except ValidationError as err:
-        return jsonify({"errors": err.messages}), 400
+        user = schema.load(data)
+    except ValidationError as e:
+        return jsonify({"error": e.messages}), 400
     
-    if User.query.filter_by(email=validated_data.get('email')).first():
-        return jsonify({"error": "Email already exist"}),409
-    else:
-        user = User(**validated_data)
-        user.set_password(data.get("password"))
-        
-        db.session.add(user)
-        db.session.commit()
-    return jsonify(user_schema.dump(user)), 201
-    
+    if User.query.filter_by(email=user.email).first():
+        return jsonify({"error": "User already exists. Please log in."}), 409
+
+    user.set_password(data.get("password"))
+
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Registered successfully",
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email
+        }
+    }), 201
 
 
 
 @api.route('/login', methods=["POST"])
 def login():
-    data = request.get_json()
-    login_schema = UserLogin()
+    data=request.get_json()
+    schema=UserLogin(session=db.session)
     
     try:
-        validated_data = login_schema.load(data)
+        user=schema.load(data)
     except ValidationError as err:
-        return jsonify({"errors": err.messages}), 400
+        return jsonify({"errors": err.messages}), 401
     
-    email = validated_data.get('email')
-    password = validated_data.get('password')
     
-    user = User.query.filter_by(email=email).first()
-    if not user or not user.verify_password(password):
-        return jsonify({"error": "Invalid Email or Password"}),401
+    if not user or not user.verify_password(data.get("password")):
+        return jsonify({"error": "Invalid Login Credentials"}), 401
+    
     
     access_token = create_access_token(identity=user.id)
-    return jsonify({"access_token": access_token, "user_id": user.id, "message": "Login Successful"})
-  
+    return jsonify({"message":"Login Successfull", "access_token": access_token}), 200
     
-   
-   
-      
+    

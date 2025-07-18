@@ -1,17 +1,17 @@
-import pytest 
-from app import create_app
-from app import db as _db 
+# conftest.py
+import pytest
+from app import create_app, db
+from app.model import User
 
-
-@pytest.fixture
-def app():
-    app=create_app(config_name='testing')
+@pytest.fixture(scope="module")
+def test_app():
+    app = create_app("testing")  # your config key
     with app.app_context():
-        _db.create_all()
-        yield app 
-        _db.drop_all()
-
+        db.create_all()
+        yield app
+        db.session.remove()
+        db.drop_all()
 
 @pytest.fixture
-def client(app):
-    return app.test_client()
+def session(test_app):
+    return db.session
