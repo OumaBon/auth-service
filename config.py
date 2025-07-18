@@ -10,12 +10,12 @@ class Config():
     DEBUG = True
     SECRET_KEY = os.environ.get('SECRET_KEY', "something very tough to gauuze")
     JWT_SECRET_KEY=os.environ.get('JWT_SECRET_KEY', "ihateusingthisthing")
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=int(os.getenv("JWT_EXP_MINUTES", 15)))
-    
-    JWT_REFRESH_TOKEN_EXPIRES=os.environ.get('JWT_REFRESH_TOKEN_EXPIRES', 3600)
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES", 15)))
+    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=int(os.getenv("JWT_REFRESH_TOKEN_EXPIRES", 30)))
     JWT_TOKEN_LOCATION = ["headers","cookies"]
     JWT_COOKIE_CSRF_PROTECT =True
     JWT_COOKIE_SECURE = False
+    JWT_BLACKLIST_ENABLED = True
 
     
     @staticmethod
