@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from marshmallow import ValidationError
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token,create_refresh_token, jwt_required,get_jwt_identity
 
 from ..model import User 
 from ..schema import UserLogin, UserRegistration
@@ -35,7 +35,6 @@ def register():
     }), 201
 
 
-
 @api.route('/login', methods=["POST"])
 def login():
     data=request.get_json()
@@ -52,6 +51,21 @@ def login():
     
     
     access_token = create_access_token(identity=user.id)
-    return jsonify({"message":"Login Successfull", "access_token": access_token}), 200
+    refresh_token = create_refresh_token(identity=user.id)
+    return jsonify({"message":"Login Successfull", "access_token": access_token, "refresh_token": refresh_token}), 200
     
-    
+
+
+@api.route('/refresh', methods=["POST"])
+@jwt_required(refresh=True)
+def refresh():
+    current_user = get_jwt_identity()
+    new_access_token=create_access_token(identity=current_user)
+    return jsonify({"New_Access_Token": new_access_token}), 200
+
+
+
+@api.route('/protected', methods=["GET"])
+@jwt_required()
+def protected():
+    return jsonify(Message="Access Granted"), 200
