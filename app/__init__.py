@@ -25,7 +25,7 @@ def create_app(config_name='default'):
     jwt.init_app(app)
     ma.init_app(app)
     
-    from app.routes import api 
+    from app.auth_v1 import api 
     
     app.register_blueprint(api)
     
