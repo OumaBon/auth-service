@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from marshmallow import ValidationError
-from flask_jwt_extended import create_access_token,create_refresh_token, jwt_required,get_jwt_identity
+from flask_jwt_extended import create_access_token,create_refresh_token, jwt_required, get_jwt_identity
 
 from ..model import User 
 from ..schema import UserLogin, UserRegistration
@@ -52,7 +52,7 @@ def login():
     
     access_token = create_access_token(identity=user.id)
     refresh_token = create_refresh_token(identity=user.id)
-    return jsonify({"message":"Login Successfull", "access_token": access_token, "refresh_token": refresh_token}), 200
+    return jsonify({"Message":"Login Successfull", "Access_Token": access_token, "Refresh_Token": refresh_token}), 200
     
 
 
@@ -69,3 +69,18 @@ def refresh():
 @jwt_required()
 def protected():
     return jsonify(Message="Access Granted"), 200
+
+
+
+@api.route('/me', methods=["GET"])
+@jwt_required()
+def get_current_user():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    
+    if not user:
+        return jsonify({"Error":"User Not Found"}), 404
+    return jsonify({"ID": user.id,
+                    "Username": user.username,
+                    "Email": user.email}), 200
+
