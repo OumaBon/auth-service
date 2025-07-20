@@ -116,3 +116,36 @@ def send_verification_email():
         html = f"Click to confirm your email: <a href='{confirm_url}'>{confirm_url}</a>"
         send_email(user.email, "Confirm your Email", html)
     return jsonify({"message": "Check your inbox to verify your email."}), 200
+
+
+@api.route('/reset_password/<token>', methods=["POST"])
+def reset_password(token):
+    email = confirm_token(token, salt='password-reset')
+    if not email:
+        return jsonify({"message": "Invalid or expired token."}),400
+    data = request.get_json()
+    new_password = data.get("password")
+    
+    if not new_password:
+        return jsonify({"message": "Invalid or expired token."}), 400
+    user = User.query.filter_by(email=email).first()
+    
+    if not user:
+        return jsonify({"message": "User not Found"}), 404
+    
+    user.set_password(new_password)
+    db.session.commit()
+    return jsonify({"message": "Password has been reset successfully"}), 200
+    
+    
+@api.route('/reset_password/request', methods=["POST"])
+def send_reset_password_email():
+    data = request.get_json()
+    user = User.query.filter_by(email=data).first()
+    
+    if user:
+        token = generate_token(user.email, salt="password-reset")
+        reset_url = url_for('api.reset_password', token=token, _external=True)
+        html = f"Click to reset your password: <a href='{reset_url}'>{reset_url}</a>"
+        send_email(user.email, "Reset Your Password", html)
+    return jsonify({"message": "Check your inbox for password reset instructions."}), 200
