@@ -3,6 +3,8 @@ from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager 
 from flask_sqlalchemy import SQLAlchemy 
 from flask_marshmallow import Marshmallow
+from flask_mail import Mail
+from flask_migrate import Migrate
 
 from config import config
 
@@ -11,6 +13,8 @@ db = SQLAlchemy()
 bcrypt = Bcrypt()
 jwt = JWTManager()
 ma = Marshmallow()
+mail = Mail()
+migrate = Migrate()
 
 
 
@@ -24,6 +28,8 @@ def create_app(config_name='default'):
     bcrypt.init_app(app)
     jwt.init_app(app)
     ma.init_app(app)
+    mail.init_app(app)
+    migrate.init_app(app, db)
     
     from app.auth_v1 import api 
     
