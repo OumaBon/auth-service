@@ -1,9 +1,11 @@
-from flask import jsonify, request
+from flask import jsonify, request, url_for
 from marshmallow import ValidationError
 from flask_jwt_extended import create_access_token,create_refresh_token, jwt_required, get_jwt_identity
 
 from ..model import User 
 from ..schema import UserLogin, UserRegistration
+from ..utils.token import generate_token, confirm_token
+from ..utils.email import send_email
 from . import api 
 from ..import db
 
@@ -84,3 +86,33 @@ def get_current_user():
                     "Username": user.username,
                     "Email": user.email}), 200
 
+
+
+@api.route('/verify_email/confirm/<token>',  methods=["GET"])
+def confirm_email(token):
+    email = confirm_token(token, salt='email-confirm')
+    if not email:
+        return jsonify({"message": "Invalid or Expired Token"}), 400
+    
+    user= User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({"messege": "User not Found."}), 404
+    
+    if user.is_verified:
+        return jsonify({"message": "Account already verified"}), 200
+    user.is_verified = True
+    db.session.commit()
+    return jsonify({"message": "Email verified successfully"}), 200
+
+
+
+@api.route('/verify_email/rquest', methods=["POST"])
+def send_verification_email():
+    data = request.get_json()
+    user = User.query.filter_by(email=data['email']).first()
+    if user:
+        token = generate_token(user.email, salt='email-confirm')
+        confirm_url = url_for('api.confirm_email', token=token, _external=True)
+        html = f"Click to confirm your email: <a href='{confirm_url}'>{confirm_url}</a>"
+        send_email(user.email, "Confirm your Email", html)
+    return jsonify({"message": "Check your inbox to verify your email."}), 200
