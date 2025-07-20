@@ -23,6 +23,7 @@ class Config():
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_USE_TLS = True
     MAIL_USE_SSL = False
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'oumamugah@gmail.com')
 
     
     @staticmethod
@@ -40,7 +41,6 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get("TEST_URI") or \
         "sqlite:///" + os.path.join(Base_Dir, "test-data.db")
     SQLALCHEMY_TRACK_MODIFICATIONS = True
-
 
 
 config = {
