@@ -16,6 +16,13 @@ class Config():
     JWT_COOKIE_CSRF_PROTECT =True
     JWT_COOKIE_SECURE = False
     JWT_BLACKLIST_ENABLED = True
+    
+    MAIL_SERVER = os.environ.get('MAIL_SERVER')
+    MAIL_PORT = os.environ.get('MAIL_PORT')
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_USE_TLS = True
+    MAIL_USE_SSL = False
 
     
     @staticmethod
