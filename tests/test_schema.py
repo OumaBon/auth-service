@@ -16,6 +16,7 @@ def test_valid_data(session):
     assert result["email"] == input_data["email"]
 
 
+
 # def test_invalid_email_format():
 #     schema = UserRegistration()
 #     input_data = {
